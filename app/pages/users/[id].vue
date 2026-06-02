@@ -57,7 +57,7 @@ const fetchFalls = async () => {
     const data = await apiFetch<any>(`/admin/users/${userId.value}/falls`, {
       params: { page: fallsPage.value, page_size: fallsPageSize }
     })
-    falls.value = data?.falls ?? data?.items ?? []
+  falls.value = data?.items ?? []
     fallsTotal.value = data?.total ?? 0
   } catch {
     toast.add('error', 'Không thể tải lịch sử té ngã')
@@ -98,17 +98,13 @@ onMounted(async () => {
   await Promise.all([fetchProfile(), fetchFalls()])
 })
 
-const formatDate = (d: string) =>
-  d
-    ? new Date(d).toLocaleString('vi-VN', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+const formatDate = (ms: number) =>
+  ms
+    ? new Date(ms).toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
       })
     : '—'
-
 const confidenceColor = (c: number) => {
   if (c >= 0.8) return 'text-green-600'
   if (c >= 0.5) return 'text-amber-600'
@@ -182,7 +178,7 @@ const confidenceColor = (c: number) => {
             <InfoRow label="Email" :value="profile.user?.email">
               <Mail class="w-3.5 h-3.5 text-gray-400" />
             </InfoRow>
-            <InfoRow label="Số điện thoại" :value="profile.user?.phone || '—'">
+            <InfoRow label="Số điện thoại" :value="profile.user?.phone_number || '—'">
               <Phone class="w-3.5 h-3.5 text-gray-400" />
             </InfoRow>
             <div class="flex justify-between items-center text-sm">
@@ -316,7 +312,7 @@ const confidenceColor = (c: number) => {
                 :key="f.id"
                 class="border-b border-gray-50 hover:bg-gray-50/50"
               >
-                <td class="px-4 py-3 text-gray-700">{{ formatDate(f.datetime_vn || f.created_at) }}</td>
+  <td class="px-4 py-3 text-gray-700">{{ f.datetime_vn || formatDate(f.timestamp * 1000) }}</td>
                 <td class="px-4 py-3">
                   <span class="badge bg-gray-100 text-gray-600">{{ f.state_before || '—' }}</span>
                 </td>

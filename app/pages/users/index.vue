@@ -13,7 +13,6 @@ const page = ref(1)
 const pageSize = 20
 
 const filterEmail = ref('')
-const filterRole = ref('')
 const filterActive = ref('')
 
 const confirmModal = ref({
@@ -39,7 +38,7 @@ const fetchUsers = async () => {
         page: page.value,
         page_size: pageSize,
         email: filterEmail.value || undefined,
-        role: filterRole.value || undefined,
+        role: 'user',
         is_active: filterActive.value !== '' ? filterActive.value : undefined
       }
     })
@@ -59,7 +58,6 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   filterEmail.value = ''
-  filterRole.value = ''
   filterActive.value = ''
   page.value = 1
   fetchUsers()
@@ -166,7 +164,7 @@ const formatDate = (d: string) =>
 
     <!-- Filters -->
     <div class="card p-4">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div class="relative">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -177,11 +175,6 @@ const formatDate = (d: string) =>
             @keydown.enter="applyFilters"
           />
         </div>
-        <select v-model="filterRole" class="input-field">
-          <option value="">Tất cả vai trò</option>
-          <option value="user">Người dùng</option>
-          <option value="admin">Admin</option>
-        </select>
         <select v-model="filterActive" class="input-field">
           <option value="">Tất cả trạng thái</option>
           <option value="true">Đang hoạt động</option>

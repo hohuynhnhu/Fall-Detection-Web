@@ -127,67 +127,8 @@ const formatKey = (key: string) =>
       </div>
     </div>
 
-    <!-- Thresholds -->
-    <div class="card p-6">
-      <div class="flex items-center justify-between mb-5">
-        <div class="flex items-center gap-2">
-          <Settings class="w-5 h-5 text-indigo-500" />
-          <h2 class="font-semibold text-gray-900">Ngưỡng phát hiện</h2>
-        </div>
-        <button
-          class="btn-secondary text-xs"
-          @click="fetchThresholds"
-        >
-          <RefreshCw class="w-3.5 h-3.5" />
-          Tải lại
-        </button>
-      </div>
-
-      <!-- Loading skeleton -->
-      <div v-if="thresholdsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="i in 6" :key="i" class="animate-pulse">
-          <div class="h-4 bg-gray-200 rounded w-2/3 mb-2" />
-          <div class="h-9 bg-gray-100 rounded" />
-        </div>
-      </div>
-
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="(value, key) in thresholdsForm"
-          :key="key"
-          v-show="key !== 'camera_id'"
-        >
-          <label class="block text-sm font-medium text-gray-700 mb-1.5">
-            {{ formatKey(String(key)) }}
-          </label>
-          <input
-            v-model.number="thresholdsForm[key]"
-            type="number"
-            step="any"
-            class="input-field"
-          />
-        </div>
-      </div>
-
-      <div v-if="!thresholdsLoading" class="flex gap-3 mt-6 pt-5 border-t border-gray-100">
-        <button
-          class="btn-primary"
-          :disabled="thresholdsSaving"
-          @click="applyThresholds"
-        >
-          <Save class="w-4 h-4" />
-          {{ thresholdsSaving ? 'Đang áp dụng...' : 'Áp dụng' }}
-        </button>
-        <button
-          class="btn-secondary"
-          :disabled="thresholdsResetting"
-          @click="resetThresholds"
-        >
-          <RotateCcw class="w-4 h-4" />
-          {{ thresholdsResetting ? 'Đang khôi phục...' : 'Đặt lại mặc định' }}
-        </button>
-      </div>
-    </div>
+    Thresholds
+    
 
     <!-- Features -->
     <div class="card p-6">

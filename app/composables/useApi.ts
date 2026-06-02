@@ -1,3 +1,5 @@
+import type { FetchOptions } from 'ofetch'
+
 export const useApi = () => {
   const config = useRuntimeConfig()
   const { token, clearAuth } = useAuth()
@@ -6,13 +8,13 @@ export const useApi = () => {
   const apiFetch = async <T = any>(
     path: string,
     options: {
-      method?: string
+      method?: FetchOptions['method']  // ✅ dùng đúng type từ ofetch
       body?: any
       params?: Record<string, any>
       headers?: Record<string, string>
     } = {}
   ): Promise<T> => {
-    const { params, body, method = 'GET', headers = {} } = options
+    const { params, body, method = 'GET' as const, headers = {} } = options
 
     const query = params
       ? Object.fromEntries(
@@ -23,7 +25,7 @@ export const useApi = () => {
     try {
       return await $fetch<T>(path, {
         baseURL: config.public.apiBase,
-        method,
+        method, 
         body,
         query,
         headers: {

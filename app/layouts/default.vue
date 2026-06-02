@@ -6,18 +6,24 @@ import {
   LogOut,
   Menu,
   X,
-  ShieldCheck
+  ShieldCheck,
+  MessageSquare,
+  Bell,
+  AlertTriangle
 } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
 const { user, clearAuth } = useAuth()
-
+  
 const sidebarOpen = ref(false)
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/users', label: 'Quản lý người dùng', icon: Users },
+  { href: '/falls', label: 'Lịch sử té ngã', icon: AlertTriangle },
+  { href: '/reports', label: 'Báo cáo & Hỗ trợ', icon: MessageSquare },
+  { href: '/notifications', label: 'Gửi thông báo', icon: Bell },
   { href: '/config', label: 'Cấu hình hệ thống', icon: Settings }
 ]
 

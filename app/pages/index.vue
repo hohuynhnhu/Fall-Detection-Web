@@ -82,8 +82,14 @@ const fetchTimeline = async () => {
     const data = await apiFetch<any>('/admin/stats/falls/timeline', {
       params: { group_by: groupBy.value }
     })
-    timeline.value = data?.timeline ?? data ?? []
-  } catch {
+
+    // Transform: { labels, counts } → [{ date, count }]
+    const labels: string[] = data?.labels ?? []
+    const counts: number[] = data?.counts ?? []
+    timeline.value = labels.map((date, i) => ({ date, count: counts[i] ?? 0 }))
+
+  } catch (e) {
+    console.error('[timeline error]', e)
     toast.add('error', 'Không thể tải dữ liệu biểu đồ')
   } finally {
     timelineLoading.value = false
