@@ -8,7 +8,7 @@ export const useApi = () => {
   const apiFetch = async <T = any>(
     path: string,
     options: {
-      method?: FetchOptions['method']  // ✅ dùng đúng type từ ofetch
+      method?: FetchOptions['method']  
       body?: any
       params?: Record<string, any>
       headers?: Record<string, string>

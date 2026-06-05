@@ -9,21 +9,22 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-vue-next'
+import type { StatsOverview, TimelinePoint, TimelineResponse, HealthStatus } from '~/types'
 
 const { apiFetch } = useApi()
 const toast = useToast()
 
 // --- Stats Overview ---
-const stats = ref<any>(null)
+const stats = ref<StatsOverview | null>(null)
 const statsLoading = ref(true)
 
 // --- Timeline Chart ---
 const groupBy = ref<'day' | 'week' | 'month'>('day')
-const timeline = ref<any[]>([])
+const timeline = ref<TimelinePoint[]>([])
 const timelineLoading = ref(true)
 
 // --- Health ---
-const health = ref<any>(null)
+const health = ref<HealthStatus | null>(null)
 const healthLoading = ref(true)
 
 const statCards = computed(() => [
@@ -79,13 +80,13 @@ const fetchStats = async () => {
 const fetchTimeline = async () => {
   timelineLoading.value = true
   try {
-    const data = await apiFetch<any>('/admin/stats/falls/timeline', {
+    const data = await apiFetch<TimelineResponse>('/admin/stats/falls/timeline', {
       params: { group_by: groupBy.value }
     })
 
     // Transform: { labels, counts } → [{ date, count }]
-    const labels: string[] = data?.labels ?? []
-    const counts: number[] = data?.counts ?? []
+    const labels = data?.labels ?? []
+    const counts = data?.counts ?? []
     timeline.value = labels.map((date, i) => ({ date, count: counts[i] ?? 0 }))
 
   } catch (e) {
@@ -179,10 +180,7 @@ onMounted(async () => {
 
         <div class="h-64">
           <div v-if="timelineLoading" class="h-full flex items-center justify-center">
-            <svg class="w-8 h-8 animate-spin text-indigo-400" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-            </svg>
+            <AppSpinner size="lg" />
           </div>
           <DashboardLineChart v-else-if="timeline.length" :data="timeline" />
           <div v-else class="h-full flex items-center justify-center text-gray-400 text-sm">

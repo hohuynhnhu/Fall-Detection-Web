@@ -12,6 +12,7 @@ import {
   X,
   Save
 } from 'lucide-vue-next'
+import type { FallEvent, UserProfile } from '~/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,11 +22,11 @@ const toast = useToast()
 const userId = computed(() => route.params.id as string)
 
 // Profile
-const profile = ref<any>(null)
+const profile = ref<UserProfile | null>(null)
 const profileLoading = ref(true)
 
 // Falls history
-const falls = ref<any[]>([])
+const falls = ref<FallEvent[]>([])
 const fallsTotal = ref(0)
 const fallsPage = ref(1)
 const fallsLoading = ref(false)
@@ -42,7 +43,7 @@ const editModal = ref({
 const fetchProfile = async () => {
   profileLoading.value = true
   try {
-    const data = await apiFetch<any>(`/admin/users/${userId.value}/profile`)
+    const data = await apiFetch<UserProfile>(`/admin/users/${userId.value}/profile`)
     profile.value = data
   } catch {
     toast.add('error', 'Không thể tải thông tin người dùng')
@@ -54,10 +55,10 @@ const fetchProfile = async () => {
 const fetchFalls = async () => {
   fallsLoading.value = true
   try {
-    const data = await apiFetch<any>(`/admin/users/${userId.value}/falls`, {
+    const data = await apiFetch<{ items: FallEvent[]; total: number }>(`/admin/users/${userId.value}/falls`, {
       params: { page: fallsPage.value, page_size: fallsPageSize }
     })
-  falls.value = data?.items ?? []
+    falls.value = data?.items ?? []
     fallsTotal.value = data?.total ?? 0
   } catch {
     toast.add('error', 'Không thể tải lịch sử té ngã')
@@ -98,18 +99,6 @@ onMounted(async () => {
   await Promise.all([fetchProfile(), fetchFalls()])
 })
 
-const formatDate = (ms: number) =>
-  ms
-    ? new Date(ms).toLocaleString('vi-VN', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-      })
-    : '—'
-const confidenceColor = (c: number) => {
-  if (c >= 0.8) return 'text-green-600'
-  if (c >= 0.5) return 'text-amber-600'
-  return 'text-red-600'
-}
 </script>
 
 <template>
@@ -312,7 +301,7 @@ const confidenceColor = (c: number) => {
                 :key="f.id"
                 class="border-b border-gray-50 hover:bg-gray-50/50"
               >
-  <td class="px-4 py-3 text-gray-700">{{ f.datetime_vn || formatDate(f.timestamp * 1000) }}</td>
+  <td class="px-4 py-3 text-gray-700">{{ f.datetime_vn || formatDateTime(Number(f.timestamp) * 1000) }}</td>
                 <td class="px-4 py-3">
                   <span class="badge bg-gray-100 text-gray-600">{{ f.state_before || '—' }}</span>
                 </td>
@@ -322,9 +311,9 @@ const confidenceColor = (c: number) => {
                 <td class="px-4 py-3">
                   <span
                     v-if="f.confidence != null"
-                    :class="['font-medium', confidenceColor(f.confidence)]"
+                    :class="['badge', confidenceClass(f.confidence as number)]"
                   >
-                    {{ (f.confidence * 100).toFixed(1) }}%
+                    {{ ((f.confidence as number) * 100).toFixed(1) }}%
                   </span>
                   <span v-else class="text-gray-400">—</span>
                 </td>
@@ -396,31 +385,3 @@ const confidenceColor = (c: number) => {
   </div>
 </template>
 
-<!-- Inline helper component -->
-<script lang="ts">
-const InfoRow = defineComponent({
-  props: { label: String, value: String },
-  setup(props, { slots }) {
-    return () =>
-      h('div', { class: 'flex justify-between items-center text-sm' }, [
-        h('span', { class: 'text-gray-500 flex items-center gap-1' }, [
-          slots.default?.(),
-          props.label
-        ]),
-        h('span', { class: 'font-medium text-gray-700 truncate ml-2 max-w-[55%]' }, props.value || '—')
-      ])
-  }
-})
-</script>
-
-<style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: all 0.2s ease;
-}
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-</style>

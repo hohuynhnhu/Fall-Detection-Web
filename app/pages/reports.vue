@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { RefreshCw, Eye, MessageSquareReply, ChevronRight, X } from 'lucide-vue-next'
+import type { Report, ReportListResponse } from '~/types'
 
 const { apiFetch } = useApi()
 const toast = useToast()
 
-const reports = ref<any[]>([])
+const reports = ref<Report[]>([])
 const total = ref(0)
 const loading = ref(false)
 
@@ -14,7 +15,7 @@ const pageSize = 20
 const filterStatus = ref('')
 const filterCategory = ref('')
 
-const detailModal = ref({ open: false, report: null as any })
+const detailModal = ref({ open: false, report: null as Report | null })
 const statusModal = ref({ open: false, reportId: '', currentStatus: '', newStatus: '', loading: false })
 const replyModal = ref({ open: false, reportId: '', userEmail: '', message: '', loading: false })
 
@@ -42,7 +43,7 @@ const statusClass: Record<string, string> = {
 const fetchReports = async () => {
   loading.value = true
   try {
-    const data = await apiFetch<any>('/admin/reports', {
+    const data = await apiFetch<ReportListResponse>('/admin/reports', {
       params: {
         page: page.value,
         page_size: pageSize,
@@ -62,16 +63,16 @@ const fetchReports = async () => {
 const applyFilters = () => { page.value = 1; fetchReports() }
 const resetFilters = () => { filterStatus.value = ''; filterCategory.value = ''; page.value = 1; fetchReports() }
 
-const openDetail = async (report: any) => {
+const openDetail = async (report: Report) => {
   try {
-    const data = await apiFetch<any>(`/admin/reports/${report.id}`)
+    const data = await apiFetch<Report>(`/admin/reports/${report.id}`)
     detailModal.value = { open: true, report: data }
   } catch {
     toast.add('error', 'Không thể tải chi tiết báo cáo')
   }
 }
 
-const openStatusModal = (report: any) => {
+const openStatusModal = (report: Report) => {
   const next = statusFlow[report.status] ?? []
   if (next.length === 0) return
   statusModal.value = {
@@ -100,7 +101,7 @@ const submitStatus = async () => {
   }
 }
 
-const openReplyModal = (report: any) => {
+const openReplyModal = (report: Report) => {
   replyModal.value = { open: true, reportId: report.id, userEmail: report.user_email || report.email || '', message: '', loading: false }
 }
 
@@ -113,7 +114,7 @@ const submitReply = async () => {
   try {
     await apiFetch(`/admin/reports/${replyModal.value.reportId}/reply`, {
       method: 'POST',
-      body: { message: replyModal.value.message }
+      body: { reply: replyModal.value.message }
     })
     toast.add('success', 'Đã gửi phản hồi đến người dùng')
     replyModal.value.open = false
@@ -127,9 +128,6 @@ const submitReply = async () => {
 
 watch(page, fetchReports)
 onMounted(fetchReports)
-
-const formatDate = (d: string) =>
-  d ? new Date(d).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'
 </script>
 
 <template>
@@ -216,7 +214,7 @@ const formatDate = (d: string) =>
                     {{ statusLabel[r.status] ?? r.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ formatDate(r.created_at) }}</td>
+                <td class="px-4 py-3 text-gray-500 whitespace-nowrap">{{ formatDateTime(r.created_at) }}</td>
                 <td class="px-4 py-3">
                   <div class="flex items-center justify-end gap-1">
                     <button
@@ -287,7 +285,7 @@ const formatDate = (d: string) =>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-3">
                   <p class="text-gray-400 text-xs mb-0.5">Thời gian</p>
-                  <p class="font-medium text-gray-900">{{ formatDate(detailModal.report.created_at) }}</p>
+                  <p class="font-medium text-gray-900">{{ formatDateTime(detailModal.report?.created_at) }}</p>
                 </div>
               </div>
               <div class="bg-gray-50 rounded-lg p-3 text-sm">
@@ -395,14 +393,3 @@ const formatDate = (d: string) =>
   </div>
 </template>
 
-<style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: all 0.2s ease;
-}
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-</style>

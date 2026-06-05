@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Search, RefreshCw, Eye, UserCheck, UserX, Shield, Trash2, ChevronDown } from 'lucide-vue-next'
+import type { User, UserListResponse } from '~/types'
 
 const { apiFetch } = useApi()
 const toast = useToast()
 const router = useRouter()
 
-const users = ref<any[]>([])
+const users = ref<User[]>([])
 const total = ref(0)
 const loading = ref(false)
 
@@ -33,7 +34,7 @@ const roleModal = ref({
 const fetchUsers = async () => {
   loading.value = true
   try {
-    const data = await apiFetch<any>('/admin/users', {
+    const data = await apiFetch<UserListResponse>('/admin/users', {
       params: {
         page: page.value,
         page_size: pageSize,
@@ -143,9 +144,6 @@ const runConfirm = async () => {
 
 watch(page, fetchUsers)
 onMounted(fetchUsers)
-
-const formatDate = (d: string) =>
-  d ? new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
 </script>
 
 <template>
@@ -350,14 +348,3 @@ const formatDate = (d: string) =>
   </div>
 </template>
 
-<style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: all 0.2s ease;
-}
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-  transform: scale(0.95);
-}
-</style>
